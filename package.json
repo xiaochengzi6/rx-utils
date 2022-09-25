@@ -1,7 +1,8 @@
 {
-  "name": "underscore-demo",
+  "name": "rx-utils",
   "version": "1.0.0",
   "main": "index.js",
   "author": "小橙子 <a2742217795@hotmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "preview": true
 }
