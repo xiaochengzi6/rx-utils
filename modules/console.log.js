@@ -1,3 +1,3 @@
-export function Log(value) {
+export default function Log(value) {
   console.log(value)
 }

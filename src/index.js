@@ -16,6 +16,8 @@
 function isFunction(obj) {
   return typeof obj === 'function'
 }
+
+// ----------------------- 优化 -----------------------
 /**
  * 优化负载函数
  */
