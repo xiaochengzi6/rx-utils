@@ -1,5 +1,5 @@
-import { isArrayLink } from "./_isArrayLink"
-import { optimizeCb } from "./_optimizeCb"
+import isArrayLink from "./_isArrayLink"
+import optimizeCb from "./_optimizeCb"
 import keys from "./keys"
 
 export default function each(obj, callback, context){

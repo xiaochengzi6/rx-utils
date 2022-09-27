@@ -1,5 +1,5 @@
 import * as allExports from './index'
-import { mixin } from './index.js'
+import mixin from './mixin'
 
 var _ = mixin(allExports)
 

@@ -27,7 +27,7 @@ function filter() {
 export default [
   // umd 格式
   {
-    input: './modules/index.default.js',
+    input: './modules/index-default.js',
     treeshake: false /*关闭摇树优化*/,
     output: {
       file: 'rx-file.js',
@@ -40,7 +40,7 @@ export default [
   },
   // esm 格式
   {
-    input: './modules/index.all.js',
+    input: './modules/index-all.js',
     treeshake: false,
     output: monolithConf({
       file: 'rx-file.esm.js',
@@ -53,12 +53,12 @@ export default [
     //preserveModules: https://rollupjs.org/guide/en/#outputpreservemodules
     preserveModules: true /*使用原始模块名称作为文件名为所有模块创建单独的块*/,
     output: [
-      outputBase({
+      outputConf({
         dir: 'amd',
         export: 'auto',
         format: 'amd'
       }),
-      outputBase({
+      outputConf({
         dir: 'cjs',
         export: 'auto',
         format: 'cjs'

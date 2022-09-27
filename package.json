@@ -8,5 +8,8 @@
   "dependencies": {
     "glob": "^8.0.3",
     "rollup": "^2.79.1"
+  },
+  "scripts": {
+    "bundle": "rollup -c"
   }
 }

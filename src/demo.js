@@ -9,8 +9,12 @@
   var push = ArrayProto.push;
 
   var _ = function(obj) {
-      if (obj instanceof _) return obj;
-      if (!(this instanceof _)) return new _(obj);
+      if (obj instanceof _) {
+        return obj
+      }
+      if (!(this instanceof _)){
+        return new _(obj)
+      }
       this._wrapped = obj;
   };
 
@@ -53,6 +57,8 @@
       return obj;
   }
 
+  
+
   _.isFunction = function(obj) {
       return typeof obj == 'function' || false;
   };
@@ -71,42 +77,58 @@
   _.reverse = function(string){
       return string.split('').reverse().join('');
   }
-_.push = function (obj) {
-  if(Array.isArray(this._wrapped)){
-    this._wrapped.push(obj)
-  }
-  this._wrapped = obj
-}
-  _.chain = function(obj) {
-      var instance = _(obj);
-      instance._chain = true;
-      return instance;
-  };
 
-  var chainResult = function(instance, obj) {
-      return instance._chain ? _(obj).chain() : obj;
-  };
+  
 
-  _.mixin = function(obj) {
-      _.each(_.functions(obj), function(name) {
-          var func = _[name] = obj[name];
-          _.prototype[name] = function() {
-              var args = [this._wrapped];
-              push.apply(args, arguments);
-              return chainResult(this, func.apply(_, args));
-          };
-      });
-      return _;
-  };
+  
+
+  _.each(['push'], function(name) {
+    var method = ArrayProto[name];
+    _.prototype[name] = function() {
+      var obj = this._wrapped;
+      method.apply(obj, arguments);
+      if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
+      return chainResult(this, obj, 'value');
+    };
+  });
+
+_.mixin = function(obj) {
+    _.each(_.functions(obj), function(name) {
+        var func = _[name] = obj[name];
+        _.prototype[name] = function() {
+            var args = [this._wrapped];
+            push.apply(args, arguments);
+            return chainResult(this, func.apply(_, args));
+        };
+    });
+    return _;
+};
 
   _.mixin(_);
+
+  var chainResult = function(instance, obj) {
+    // console.log('obj', obj)
+      return instance._chain ? _(obj).chain() : obj;
+  };
+  _.chain = function chain(obj) {
+    var instance = _(obj);
+    instance._chain = true;
+  //   console.log(' \n instance', instance, obj)
+    return instance;
+};
+  _.prototype.chain = function(obj) {
+    var instance = _(obj);
+    instance._chain = true;
+  //   console.log(' \n instance', instance, obj)
+    return instance;
+};
 
   _.prototype.value = function () {
       return this._wrapped;
   };
 
   var arr = _.chain([1, 2, 3]).push(1);
-console.log(arr) // [2, 3, 4]
+  console.log(arr)
 })()
 
 /**
