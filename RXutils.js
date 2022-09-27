@@ -4,14 +4,9 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global._ = factory());
 })(this, (function () { 'use strict';
 
-  function Log(value) {
+  function log(value) {
     console.log(value);
   }
-
-  var allExports = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Log: Log
-  });
 
   // 创建版本
   var VERSION = '1.0.0';
@@ -46,21 +41,6 @@
 
   // 最大值
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
-
-  function _$1() {
-    var _ = function (obj) {
-      if (obj instanceof _) return obj
-      if (!(this instanceof _)) return new _(obj)
-      this._wrapped = obj;
-    };
-  }
-
-  _$1.VERSION = VERSION;
-
-  // 返回最终结果
-  _$1.prototype.value = function () {
-    return this._wrapped
-  };
 
   function isArrayLink(obj){
     var length = obj.length;
@@ -161,6 +141,21 @@
     return names.sort()
   }
 
+  function _$1() {
+    var _ = function (obj) {
+      if (obj instanceof _) return obj
+      if (!(this instanceof _)) return new _(obj)
+      this._wrapped = obj;
+    };
+  }
+
+  _$1.version = VERSION;
+
+  // 返回最终结果
+  _$1.prototype.value = function () {
+    return this._wrapped
+  };
+
   /**
    * 这里默认不开启链式调用
    * 
@@ -191,6 +186,18 @@
 
     return _$1
   }
+
+  var allExports = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    log: log,
+    each: each,
+    isObject: isObject,
+    isFunction: isFunction,
+    functions: functions,
+    keys: keys,
+    mixin: mixin,
+    tagTester: tagTester
+  });
 
   var _ = mixin(allExports);
 

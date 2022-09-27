@@ -11,11 +11,11 @@ var sourcemapBase = {
   sourcemapExcludeSources: true
 }
 
-function outputConf(particular) {
+export function outputConf(particular) {
   return Object.assign({}, particular, outputBase)
 }
 
-function monolithConf(particular) {
+export function monolithConf(particular) {
   return Object.assign({}, particular, outputBase, sourcemapBase)
 }
 
@@ -30,7 +30,7 @@ export default [
     input: './modules/index-default.js',
     treeshake: false /*关闭摇树优化*/,
     output: {
-      file: 'rx-file.js',
+      file: 'RXutils.js',
       format: 'umd',
       name: '_',
       amd: {
@@ -43,7 +43,7 @@ export default [
     input: './modules/index-all.js',
     treeshake: false,
     output: monolithConf({
-      file: 'rx-file.esm.js',
+      file: 'RXutils.esm.js',
       format: 'esm'
     })
   },
@@ -64,5 +64,19 @@ export default [
         format: 'cjs'
       })
     ]
+  },
+  // 测试 版本
+  {
+    input: {
+      'RX-node-cjs': 'modules/index-default.js',
+      'RX-node-mjs': 'modules/index-all.js'
+    },
+    treeshake: false,
+    output: monolithConf({
+      chunkFileNames: 'RX-node-f.js',
+      dir: '.',
+      minifyInternalExports: false,
+      format: 'esm'
+    })
   }
 ]

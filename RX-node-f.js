@@ -1,11 +1,6 @@
-function Log(value) {
+function log(value) {
   console.log(value);
 }
-
-var allExports = {
-  __proto__: null,
-  Log: Log
-};
 
 // 创建版本
 var VERSION = '1.0.0';
@@ -41,71 +36,56 @@ var nativeKeys = Object.keys,
 // 最大值
 var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 
-function _$1() {
-  var _ = function (obj) {
-    if (obj instanceof _) return obj
-    if (!(this instanceof _)) return new _(obj)
-    this._wrapped = obj;
-  };
-}
-
-_$1.VERSION = VERSION;
-
-// 返回最终结果
-_$1.prototype.value = function () {
-  return this._wrapped
-};
-
-function isArrayLink(obj) {
+function isArrayLink(obj){
   var length = obj.length;
-  if (obj && typeof length === 'number' && length >= 0 && length < MAX_ARRAY_INDEX) {
+  if(obj && typeof length === 'number' && length >= 0 && length < MAX_ARRAY_INDEX){
     return true
   }
   return false
 }
 
-function optimizeCb(func, context, argCount) {
-  if (context === void 0) return func
-
+function optimizeCb(func, context, argCount){
+  if(context === void 0) return func 
+  
   // 使用 call 的性能比使用 apply 的要好
   switch (argCount == null ? 3 : argCount) {
     case 1:
-      return function (value) {
+      return function(value){
         return func.call(context, value)
       }
     case 2:
-      return function (value, index) {
+      return function(value, index){
         return func.call(context, value, index)
       }
     case 3:
-      return function (value, index, args) {
+      return function (value, index, args){
         return func.call(context, value, index, args)
       }
     // 例如 redux
     case 4:
-      return function (preValue, value, index, args) {
+      return function (preValue, value, index, args){
         return func.call(context, preValue, value, index, args)
-      }
+      } 
   }
-
-
+  
+  
   // 剩余情况
-  return function () {
+  return function (){
     return func.apply(context, arguments)
   }
 }
 
-function isObject(obj) {
+function isObject(obj){
   var type = typeof obj;
   return type === 'function' || (type === 'object' && !!obj)
 }
 
 // 处理 key 是否是 obj 的属性
-function has(obj, key) {
+function has(obj, key){
   return obj != null && hasOwnProperty.call(obj, key)
 }
 
-function keys(obj) {
+function keys(obj){
   if (!isObject(obj)) return []
   if (nativeKeys) return nativeKeys(obj)
   var keys = [];
@@ -114,17 +94,17 @@ function keys(obj) {
   return keys
 }
 
-function each(obj, callback, context) {
+function each(obj, callback, context){
   var iteratee = optimizeCb(callback, context);
   var i, length;
 
-  if (isArrayLink(obj)) {
-    for (i = 0, length = obj.length; i < length; i++) {
+  if(isArrayLink(obj)){
+    for(i = 0, length = obj.length; i < length; i++){
       iteratee(obj[i], i, obj);
     }
-  } else {
+  }else {
     var _keys = keys(obj);
-    for (i = 0, length = _keys.length; i < length; i++) {
+    for(i = 0, length = _keys.length; i < length; i++){
       iteratee(obj[_keys[i]], _keys[i], obj);
     }
   }
@@ -132,10 +112,10 @@ function each(obj, callback, context) {
   return obj
 }
 
-function tagTester(name) {
+function tagTester(name){
   var tag = '[object ' + name + ']';
 
-  return function (obj) {
+  return function(obj){
     return toString.call(obj) === tag
   }
 }
@@ -143,17 +123,32 @@ function tagTester(name) {
 var isFunction = tagTester('Function');
 
 // 遍历找出对象上所有的函数
-function functions(obj) {
+function functions (obj) {
   var names = [];
 
-  for (var key in obj) {
-    if (isFunction(obj[key])) {
+  for(var key in obj){
+    if(isFunction(obj[key])){
       names.push(key);
     }
   }
-
+  
   return names.sort()
 }
+
+function _$1() {
+  var _ = function (obj) {
+    if (obj instanceof _) return obj
+    if (!(this instanceof _)) return new _(obj)
+    this._wrapped = obj;
+  };
+}
+
+_$1.version = VERSION;
+
+// 返回最终结果
+_$1.prototype.value = function () {
+  return this._wrapped
+};
 
 /**
  * 这里默认不开启链式调用
@@ -164,7 +159,7 @@ function functions(obj) {
  * @param {*} obj 当前对象
  * @returns 
  */
-function chainResult(instance, obj) {
+function chainResult(instance, obj){
   return instance._chain ? _$1(obj).chain() : obj
 }
 
@@ -172,13 +167,13 @@ function chainResult(instance, obj) {
  * 将对象的所有方法混合到 _ 对象的原型上
  * @param {*} obj 
  */
-function mixin(obj) {
-  each(functions(obj), function (name) {
+function mixin(obj){
+  each(functions(obj), function (name){
     var func = _$1[name] = obj[name];
-    _$1.prototype[name] = function () {
+    _$1.prototype[name] = function(){
       var args = [this._wrapped];
       push.apply(args, arguments);
-
+      
       return chainResult(this, func.call(_$1, args))
     };
   });
@@ -186,9 +181,21 @@ function mixin(obj) {
   return _$1
 }
 
+var allExports = {
+  __proto__: null,
+  log: log,
+  each: each,
+  isObject: isObject,
+  isFunction: isFunction,
+  functions: functions,
+  keys: keys,
+  mixin: mixin,
+  tagTester: tagTester
+};
+
 var _ = mixin(allExports);
 
 _._ = _;
 
-export { Log, _ as default };
-//# sourceMappingURL=rx-file.esm.js.map
+export { _, each, functions, isFunction, isObject, keys, log, mixin, tagTester };
+//# sourceMappingURL=RX-node-f.js.map

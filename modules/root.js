@@ -8,7 +8,7 @@ export default function _() {
   }
 }
 
-_.VERSION = VERSION
+_.version = VERSION
 
 // 返回最终结果
 _.prototype.value = function () {

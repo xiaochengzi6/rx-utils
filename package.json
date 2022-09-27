@@ -9,7 +9,9 @@
     "glob": "^8.0.3",
     "rollup": "^2.79.1"
   },
+  "type": "commonjs",
   "scripts": {
-    "bundle": "rollup -c"
+    "bundle": "rollup -c",
+    "dev": "rollup -c rollup.dev.js"
   }
 }
