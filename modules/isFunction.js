@@ -1,4 +1,4 @@
-import tagTester from "./tagTester";
+import tagTester from "./_tagTester";
 
 var isFunction = tagTester('Function')
 

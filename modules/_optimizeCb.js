@@ -1,3 +1,10 @@
+/**
+ * 回调函数在使用 call || apply 时候的优化 
+ * @param {*} func 回调函数
+ * @param {*} context? 上下文 可选 
+ * @param {*} argCount? 其他参数 可选
+ * @returns 
+ */
 export default function optimizeCb(func, context, argCount){
   if(context === void 0) return func 
   

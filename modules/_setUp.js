@@ -14,7 +14,7 @@ export var root =
   {}
 
 // 持有其原型
-export var ArrayProto = Array.prototype, ObjectProto = Array.prototype
+export var ArrayProto = Array.prototype, ObjectProto = Object.prototype
 export var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null
 
 // 使用原始的 array 方法

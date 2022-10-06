@@ -2,6 +2,14 @@ import isArrayLink from "./_isArrayLink"
 import optimizeCb from "./_optimizeCb"
 import keys from "./keys"
 
+/**
+ * 遍历对象和数组
+ * 
+ * @param {*} obj 处理对象||数组 
+ * @param {*} callback 回调函数
+ * @param {*} context 绑定的this
+ * @returns 
+ */
 export default function each(obj, callback, context){
   var iteratee = optimizeCb(callback, context)
   var i, length

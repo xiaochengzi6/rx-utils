@@ -98,6 +98,7 @@ _.mixin = function(obj) {
         _.prototype[name] = function() {
             var args = [this._wrapped];
             push.apply(args, arguments);
+            // 链式调用的问题就在这里解决 
             return chainResult(this, func.apply(_, args));
         };
     });
@@ -131,7 +132,5 @@ _.mixin = function(obj) {
   console.log(arr)
 })()
 
-/**
- * 链式调用这一块主要看 push 如何处理的 不着急
- */
+
 

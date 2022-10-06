@@ -91,7 +91,7 @@ function cloneSymbol(target){
  */
 function cloneFunc(target){
   if(!target.toString) return function (){}
-  if(!!target.name) {
+  if(!target.name) {
     console.log('sss')
     var funcName = 'RANDOM_FUNCTION_NAME_' + Math.random(1).toString(32).slice(2)
     /**
@@ -106,6 +106,13 @@ function cloneFunc(target){
   return result
 }
 
+function isFunction(obj){
+  typeof obj === 'function'
+}
+
+function clone_Func (obj){
+  return obj 
+}
 function cloneOtherType(target, type, context){
   if(typeof target === 'undefined' || type === undefined) return void 0
   if(target === null) return null 
@@ -124,7 +131,7 @@ function cloneOtherType(target, type, context){
     case 'Symbol':
       return cloneSymbol(target)
     case 'Function':
-      return cloneFunc(target, context)
+      return clone_Func(target, context)
     default:
       return null 
   }
