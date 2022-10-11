@@ -1,7 +1,7 @@
 import getType from "./getType"
 import cloneFunction from "./_cloneFunction"
 import cloneSymbol from "./_cloneSymbol"
-import cloneReg from "./_cloneREG"
+import cloneReg from "./_cloneReg"
 
 export default function cloneOtherType(target, type){
   if(typeof target === 'undefined' || type === undefined) return void 0
@@ -12,7 +12,6 @@ export default function cloneOtherType(target, type){
     type = getType(target)
   }
 
-  // 虽然可以修改普通类型的 constructor 但是再去获取也是被Boolean 包装后的所以不必太担心
   var Ctor  = target['constructor']
   
   switch (type) {

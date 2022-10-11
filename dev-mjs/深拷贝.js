@@ -116,8 +116,7 @@ function clone_Func (obj){
 function cloneOtherType(target, type, context){
   if(typeof target === 'undefined' || type === undefined) return void 0
   if(target === null) return null 
-  // 普通类型的constructor应该不会去改变 但是也可以改变
-  var Ctor  = target['constructor']
+
   switch (type) {
     case 'Number':
     case 'String':
@@ -125,7 +124,7 @@ function cloneOtherType(target, type, context){
     case 'Error':
     case 'number':
     case 'Date':
-      return new Ctor(target) 
+      return target
     case 'RegExp':
       return cloneReg(target)
     case 'Symbol':
@@ -197,13 +196,15 @@ const target = {
   map: new Map(),
   set: new Set(),
   func: function a (a, b){
-    return a + b
+    
+    return a + b + this.field1
   }
 };
 
 // test 
 var result = Clone(target)
 _.log(result)
+_.log(result.func(1,2))
 
 /**
  * todo 复制函数有问题 需要考虑正则的处理 

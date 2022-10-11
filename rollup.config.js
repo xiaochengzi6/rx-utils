@@ -65,7 +65,7 @@ export default [
       })
     ]
   },
-  // 测试 版本
+  // 这里生成 node 端的版本 但并不是最终版这里还需要再转化一下
   {
     input: {
       'RX-node-cjs': 'modules/index-default.js',

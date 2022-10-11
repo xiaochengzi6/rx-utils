@@ -1,7 +1,7 @@
-import restArguments from "./restArauments"
+// import restArguments from "./restArauments"
 
-var union = restArguments(function (arrays){
-  return 
-})
+// var union = restArguments(function (arrays){
+//   return 
+// })
 
-export default 
+// export default 

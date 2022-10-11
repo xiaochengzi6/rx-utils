@@ -12,6 +12,7 @@
   "type": "commonjs",
   "scripts": {
     "bundle": "rollup -c",
-    "dev": "rollup -c rollup.dev.js"
+    "dev": "rollup -c rollup.dev.js",
+    "all": "yarn bundle & yarn dev"
   }
 }

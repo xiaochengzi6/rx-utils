@@ -1,3 +1,5 @@
+import getType from './getType'
+
 var createInstance = [
   { 'Object': new Object() },
   { 'Map': new Map() },
