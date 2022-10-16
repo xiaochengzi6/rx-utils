@@ -12,8 +12,6 @@ export default function cloneOtherType(target, type){
     type = getType(target)
   }
 
-  var Ctor  = target['constructor']
-  
   switch (type) {
     case 'Number':
     case 'String':
@@ -21,7 +19,7 @@ export default function cloneOtherType(target, type){
     case 'Error':
     case 'number':
     case 'Date':
-      return new Ctor(target) 
+      return target
     case 'RegExp':
       return cloneReg(target)
     case 'Symbol':

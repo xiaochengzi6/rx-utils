@@ -151,6 +151,44 @@
     return obj
   }
 
+  function identity(value) {
+    return value 
+  }
+
+  /**
+   * 传入的剩余参数 
+   * 
+   * 如果传入超过函数原本的参数那么都会以 rest 参数的方式传入进去
+   * 原理：(1, 2, ...res) => apply(x, [1, 2, [x, x, x]])
+   * @param {*} func 函数 
+   * @param {*} startIndex 从第几位开始指定 rest  
+   */
+  function restArguments(func, startIndex){
+    startIndex = startIndex == null ? func.length - 1 : +startIndex;
+    return function (){
+      var length = Math.max(arguments - startIndex, 0),
+          rest = Array(length),
+          index = 0;
+      for(; index < length; index++){
+        rest[index] = arguments[length + index];
+      }
+
+      // 当传入的函数的参数小于等于1时就不会进入到这里面
+      switch(startIndex){
+        case 0: return func.call(this, rest)
+        case 1: return func.call(this, arguments[0], rest)
+        case 2: return func.call(this, arguments[0], arguments[1], rest)
+      }
+
+      var args = Array(length + 1);
+      for(index = 0; index < startIndex; index++){
+        args[index] = arguments[index];
+      }
+      args[startIndex] = rest;
+      return func.apply(this, args)
+    }
+  }
+
   function tagTester(name){
     var tag = '[object ' + name + ']';
 
@@ -164,6 +202,15 @@
   var isArray = nativeIsArray || tagTester('Array');
 
   var isArguments = tagTester('Arguments');
+
+  function allKeys(obj){
+    if(!isObject) return []
+    if(nativeKeys) return nativeKeys
+    var keys = [];
+    for(var key in obj) keys.push(key);
+
+    return keys 
+  }
 
   /**
    * 返回对象的浅层属性
@@ -286,38 +333,135 @@
     return _$1
   }
 
+  function iteratee (value, context){
+    return cb(value, context, Infinity)
+  }
+
   /**
-   * 传入的剩余参数 
+   * 柯里化函数 用于对象的合并
    * 
-   * 如果传入超过函数原本的参数那么都会以 rest 参数的方式传入进去
-   * 原理：(1, 2, ...res) => apply(x, [1, 2, [x, x, x]])
-   * @param {*} func 函数 
-   * @param {*} startIndex 从第几位开始指定 rest  
+   * var extends = createAssigner(_.keys)
+   * var b = a({}, {a: 1}, {b: 2}) ===> {a: 1, b: 2}
+   * 
+   * @param {*} keysFunc 对象 keys 集合
+   * @param {*} defaults 默认对象
+   * @returns 复制后的对象
    */
-  function restArguments(func, startIndex){
-    startIndex = startIndex == null ? func.length - 1 : +startIndex;
-    return function (){
-      var length = Math.max(arguments - startIndex, 0),
-          rest = Array(length),
-          index = 0;
-      for(; index < length; index++){
-        rest[index] = arguments[length + index];
+  function createAssigner(keysFunc, defaults){
+    return function (obj){
+      var length = arguments.length;
+      if(defaults) obj = Object(obj);
+      if(length < 2 || obj == null) return obj
+      for(var index = 1; index < length; index++){
+        var source = arguments[i];
+        var keys = keysFunc(source);
+        l = keys.length;
+        for(var i = 1; i < l; i++){
+          var key = keys[i];
+          if(!defaults || obj[key] === void 0){
+            obj[key] = source[key];
+          }
+        }
       }
 
-      // 当传入的函数的参数小于等于1时就不会进入到这里面
-      switch(startIndex){
-        case 0: return func.call(this, rest)
-        case 1: return func.call(this, arguments[0], rest)
-        case 2: return func.call(this, arguments[0], arguments[1], rest)
-      }
-
-      var args = Array(length + 1);
-      for(index = 0; index < startIndex; index++){
-        args[index] = arguments[index];
-      }
-      args[startIndex] = rest;
-      return func.apply(this, args)
+      return obj 
     }
+  }
+
+  const extendOwn = createAssigner(allKeys);
+  var extendOwn$1 = extendOwn;
+
+  function isMatch(obj, attrs){
+    var _keys = keys(obj), length = _keys.length;
+    if(object == null) return !length
+    var obj = Object(object);
+    for(var i = 0; i < length; i++){
+      var key = _keys[i];
+      if(attrs[key] !== obj[key] || !(key in obj)) return false 
+    }
+    return true 
+  }
+
+  /**
+   * 返回一个断言函数用来判断属性是否是这个对象的
+   * @param {*} attrs 
+   * @returns 
+   */
+  function matcher(attrs){
+    attrs = extendOwn$1({}, attrs); 
+    return function (obj){
+      return isMatch(obj, attrs)
+    }
+  }
+
+  function deepGet(obj, path){
+    var length = path.length;
+    for(var i = 0; i < length; i++){
+      if(obj == null) return void 0
+      obj = obj[path[i]];
+    }
+
+    return length ? obj : void 0 
+  }
+
+  /**
+   * 返回一个函数，该函数将返回任何传入对象的指定属性
+   * 
+   * 1. 如果 value 是简单类型 string 那么就会返回一个函数 
+   * 2. 如果 value 是一个数组 那么就会采用深递归的方式取得最终值例如 ([{a: 1},{b: {c: 1}}], [b, c]) ===> 1
+   * @param {*} value 
+   * @returns 
+   */
+  function property(value){
+    if(!isArray(value)){
+      return shallowProperty(value)
+    }
+    return function (obj){
+      return deepGet(obj, value)
+    }
+  }
+
+  const builtinIteratee = iteratee;
+
+  var builtinIteratee$1 = builtinIteratee;
+
+  /**
+   * 回调函数参数类型不定的处理
+   * 
+   * 1. 如果参数 iteratee 没有值 返回原数组/原对象
+   * 2. 如果参数 iteratee 是一个函数 正常处理
+   * 3. 如果参数 iteratee 是一个对象 返回和这个对象匹配的数组类似于 cb([{b: 1}, {a: 1}], {a: 1}) ===> [false, true]
+   * 4. 如果参数 iteratee 是一个字符串 或者是一个数组时 返回相对应的属性集合
+   * 
+   * @param {*} iteratee 
+   * @param {*} context 
+   */
+  function cb(value, context, argCount){
+    if(iteratee !== builtinIteratee$1) return iteratee(value, context)
+    if(value == null) return identity
+    if(isFunction(value)) return optimizeCb(value, context, argCount)
+    if(isObject(value) || !isArray(value)) return matcher(value)
+    
+    return property(value)
+  }
+
+  /**
+   * 遍历数组
+   * 
+   * 返回一个每次使用遍历函数处理过的数组
+   * @param {*} obj 
+   * @param {*} iteratee 
+   * @param {*} context 
+   * @returns 
+   */
+  function map (obj, iteratee, context){
+    iteratee = cb(iteratee, context);
+
+    var length = obj.length, result = Array.length(length);
+    for(var i = 0; i < length; i++){
+      result[i] = iteratee(obj[index], index, obj);
+    }
+    return result 
   }
 
   /**
@@ -329,6 +473,48 @@
     return func || {}
   }
 
+  /**
+   * 克隆函数这里也有许多问题 我深度研究过
+   * 具体方法两种 但这两种都明显不科学
+   * 1、使用 eval 
+   * 2、使用 new Function ()
+   * 
+   * @see https://github.com/xiaochengzi6/Blog/issues/5#issuecomment-1272406786
+   * 如果深入的学习过函数作用域的都知道 函数在创建或者说在书写的时候就已经明确函数的作用域了
+   * 你在重新创建函数岂不是会丢失 this 以及其内部标识符查询时无法按照原先的作用域链访问索引符
+   * 还是就是使用 new Function () 它不能够为 箭头函数创建函数，第二个就是使用 new Function ()创建的函数
+   * 作用域链的查找过程是 scope = Ao + globAO  因为 new Function 是在全局定义的有且只有一个...
+   */
+
+
+  /**
+   * 使用 eval 克隆函数的实现 
+   * 
+   * 
+   * 复制函数
+   * 缺点：丢失 this 丢失 prototype 丢失很多东西 只能往外面传不能收
+   * 函数的参数不能接收 因为被 ()() 包裹 函数的返回值也不能在合适的位置收到
+   * @param {*} target 
+   * @param {*} context 
+   * @returns 
+   */
+   function cloneFunc_test_demo_bad(target){
+    if(!target.toString) return function (){}
+    if(!target.name) {
+      console.log('sss');
+      var funcName = 'RANDOM_FUNCTION_NAME_' + Math.random(1).toString(32).slice(2);
+      /**
+       * @see 修改函数名 https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/name
+       */
+      Object.defineProperty(target, 'name', {value: funcName,configurable: true}); 
+    }
+    var funcToString = target.toString();
+    // 将函数包裹成IIFE类型从而能够子调用
+    funcToString = '(' + funcToString + `)()`;
+    var result = eval.bind(Object.create({}), funcToString);
+    return result
+  }
+
   var symbolValueOf = Symbol.prototype.valueOf;
 
   /**
@@ -337,8 +523,21 @@
    * @returns 
    */
   function cloneSymbol(symbol){
-    return symbolValueOf(symbol)  
+    return symbolValueOf.call(symbol)  
   }
+
+  /**
+   * 关于 symbol 做了一个demo 
+   * var a = Symbol('default')
+   * var b = Symbol.prototype.valueOf
+   * var c = b.call(a)
+   * 
+   * a == c // true 
+   * a === c // true 
+   * 
+   * 有些例子使用 Object() 将之(Symbol.prototype.valueOf.call(xxx))包裹我认为可能有些多余 或者说方法过时
+   * @see https://juejin.cn/post/6844903929705136141#heading-9
+   */
 
   /**
    * 克隆正则
@@ -363,8 +562,6 @@
       type = getType(target);
     }
 
-    var Ctor  = target['constructor'];
-    
     switch (type) {
       case 'Number':
       case 'String':
@@ -372,7 +569,7 @@
       case 'Error':
       case 'number':
       case 'Date':
-        return new Ctor(target) 
+        return target
       case 'RegExp':
         return cloneReg(target)
       case 'Symbol':
@@ -458,6 +655,53 @@
     return cloneTarget
   }
 
+  /**
+   * 遍历对象 
+   * 
+   * @param {*} obj 
+   * @param {*} iteratee 
+   * @param {*} context 
+   * @returns 
+   */
+  function mapObj(obj, iteratee, context){
+    iteratee = cb(iteratee, context);
+    
+    var _keys = keys(obj), length = _keys(obj), results = {};
+    for(var i = 0; i< length; i++){
+      var currentKey = _keys[index];
+      results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
+    }
+    return results 
+  }
+
+  const extend = createAssigner(keys);
+
+  /**
+   * 平铺对象属性
+   * 
+   * @param {*} obj 
+   * @param {*} output 
+   * @returns 
+   */
+  function unfoldObj (obj, output){
+    let result = output || {}; 
+    for(var key in obj){
+      if(hasOwnProperty.call(obj, key)){
+        if(isObject(obj)){
+          unfoldObj(obj[key], {});
+        }else {
+          result[key] = obj[key];
+        }
+      }
+    }
+
+    return result 
+  }
+
+  /**
+   * 存在的问题 就是不能处理 map set 等值 还有循环引用..
+   */
+
   function radomId(){
     // todo 获取传入的参数生成 md5 或者是一些其他的东西
 
@@ -471,16 +715,23 @@
     log: log,
     getType: getType,
     each: each,
+    identity: identity,
+    restArguments: restArguments,
     isObject: isObject,
     isFunction: isFunction,
     isArray: isArray,
     isArguments: isArguments,
     keys: keys,
+    allKeys: allKeys,
     hasSymbolKeys: hasSymbolKeys,
     functions: functions,
     mixin: mixin,
-    restArguments: restArguments,
+    map: map,
     deepClone: deepClone,
+    mapObj: mapObj,
+    extend: extend,
+    extendOwn: extendOwn$1,
+    unfoldObj: unfoldObj,
     radomId: radomId
   });
 

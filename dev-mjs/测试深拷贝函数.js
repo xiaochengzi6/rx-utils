@@ -4,7 +4,12 @@ const target = {
   field1: 1,
   field2: undefined,
   field3: {
-      child: 'child'
+      child: 'child',
+      b: {
+        c: {
+          e: '1'
+        }
+      }
   },
   field4: [2, 4, 8],
   empty: null,

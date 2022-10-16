@@ -1,7 +1,6 @@
-var a = {
-  a: 1
-}
+var a = Symbol('default')
+var b = Symbol.prototype.valueOf
+var c = b.call(a)
 
-a['constructor'] = 9
-
-console.log(a['constructor'])
+console.log(a == c )
+console.log(a === c )
