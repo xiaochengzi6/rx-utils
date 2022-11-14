@@ -14,3 +14,9 @@ _.version = VERSION
 _.prototype.value = function () {
   return this._wrapped
 }
+
+_.prototype.valueOf = _.prototype.toJson = _.prototype.value
+
+_.prototype.toString = function() {
+  return String(this._wrapped)
+}

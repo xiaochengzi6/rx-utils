@@ -13,6 +13,7 @@
   "scripts": {
     "bundle": "rollup -c",
     "dev": "rollup -c rollup.dev.js",
-    "all": "yarn bundle & yarn dev"
+    "all": "yarn bundle & yarn dev",
+    "watch": "rollup -c -w"
   }
 }

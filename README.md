@@ -6,6 +6,10 @@ js 的工具库
 
 `rx-file` 主要继承于 [`underscore`](https://github.com/jashkenas/underscore/) 毕竟作者会动不动的去抄`underscore`的代码 `underscore` 它是非常成功 内置了很多的功能函数和底层函数 `rx-file` 要做的就是继承而后独立于的这个过程 去内置更多的更有意思的函数
 
+## 使用
+`modules` 文件夹存储功能函数，使用 `yarn watch` 命令然后去调试代码`/umd` || `/esm`下的代码
+使用 `yarn all` 打包文件
+
 ## 打包文件
 
 `RXutils.js` umd 格式文件
@@ -45,3 +49,5 @@ rx-node.mjs
 3. 使用 rollup 打包
 
 4. 后续 ...(优化)
+
+## 功能函数的使用

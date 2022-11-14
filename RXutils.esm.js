@@ -296,6 +296,12 @@ _$1.prototype.value = function () {
   return this._wrapped
 };
 
+_$1.prototype.valueOf = _$1.prototype.toJson = _$1.prototype.value;
+
+_$1.prototype.toString = function() {
+  return String(this._wrapped)
+};
+
 /**
  * 这里默认不开启链式调用
  * 
@@ -325,10 +331,6 @@ function mixin(obj){
   });
 
   return _$1
-}
-
-function iteratee (value, context){
-  return cb(value, context, Infinity)
 }
 
 /**
@@ -363,26 +365,39 @@ function createAssigner(keysFunc, defaults){
 }
 
 const extendOwn = createAssigner(allKeys);
-var extendOwn$1 = extendOwn;
 
+/**
+ * 判断目标对象 obj 中的属性有没有 attrs 对象
+ * 例如: [{name:'Kevin'}, {name: 'Daisy', age: 18}], {name: 'Daisy'} ==> [false, true]
+ * 
+ * @param {*} obj 目标对象
+ * @param {*} attrs 传入的对象
+ * @returns boolean 
+ */
 function isMatch(obj, attrs){
   var _keys = keys(obj), length = _keys.length;
-  if(object == null) return !length
-  var obj = Object(object);
+
+  if(obj == null) return !length
+
+  var _obj = Object(obj);
   for(var i = 0; i < length; i++){
     var key = _keys[i];
-    if(attrs[key] !== obj[key] || !(key in obj)) return false 
+    if(attrs[key] !== _obj[key] || !(key in _obj)) return false 
   }
   return true 
 }
 
 /**
  * 返回一个断言函数用来判断属性是否是这个对象的
+ * 
+ * 1. 拷贝传入的对象
+ * 2. 判断两个对象中的值是否相同并返回结果
+ * 
  * @param {*} attrs 
  * @returns 
  */
 function matcher(attrs){
-  attrs = extendOwn$1({}, attrs); 
+  attrs = extendOwn({}, attrs); 
   return function (obj){
     return isMatch(obj, attrs)
   }
@@ -415,6 +430,12 @@ function property(value){
   }
 }
 
+function iteratee (value, context){
+  return cb(value, context, Infinity)
+}
+
+_$1.iteratee = iteratee;
+
 const builtinIteratee = iteratee;
 
 var builtinIteratee$1 = builtinIteratee;
@@ -422,16 +443,16 @@ var builtinIteratee$1 = builtinIteratee;
 /**
  * 回调函数参数类型不定的处理
  * 
- * 1. 如果参数 iteratee 没有值 返回原数组/原对象
- * 2. 如果参数 iteratee 是一个函数 正常处理
- * 3. 如果参数 iteratee 是一个对象 返回和这个对象匹配的数组类似于 cb([{b: 1}, {a: 1}], {a: 1}) ===> [false, true]
- * 4. 如果参数 iteratee 是一个字符串 或者是一个数组时 返回相对应的属性集合
+ * 1. 如果_.iteratee 被修改 就是用 _.iteratee
+ * 2. 如果参数 iteratee 没有值 就直接返回
+ * 3. 如果参数 iteratee 是一个函数 正常处理
+ * 4. 如果参数 iteratee 是一个对象也不是数组 返回和这个对象匹配的数组类似于 cb([{b: 1}, {a: 1}], {a: 1}) ===> [false, true
  * 
  * @param {*} iteratee 
  * @param {*} context 
  */
 function cb(value, context, argCount){
-  if(iteratee !== builtinIteratee$1) return iteratee(value, context)
+  if(_$1.iteratee !== builtinIteratee$1) return _$1.iteratee(value, context)
   if(value == null) return identity
   if(isFunction(value)) return optimizeCb(value, context, argCount)
   if(isObject(value) || !isArray(value)) return matcher(value)
@@ -671,30 +692,78 @@ function mapObj(obj, iteratee, context){
 const extend = createAssigner(keys);
 
 /**
- * 平铺对象属性
+ * 遍历对象 返回 iteratee 函数处理后的对象
  * 
- * @param {*} obj 
- * @param {*} output 
+ * @param {*} obj 目标对象
+ * @param {*} callback 回调函数 
+ * @param {*} deep 是否深递归 
+ * @param {*} output 返回上一次运行的值
  * @returns 
  */
-function unfoldObj (obj, output){
-  let result = output || {}; 
-  for(var key in obj){
-    if(hasOwnProperty.call(obj, key)){
-      if(isObject(obj)){
-        unfoldObj(obj[key], {});
-      }else {
-        result[key] = obj[key];
+function eachFlattenObj(obj, iteratee, deep, output) {
+  var result = output || {};
+  if (!isObject(obj)) return result
+
+  for (var key in obj) {
+    if (has(obj, key)) {
+      if (deep) {
+        if (isObject(obj[key])) {
+          eachFlattenObj(obj[key], iteratee, deep, result);
+        } else {
+          // 如果 iteratee 不返回值就默认返回 obj[key]
+          result[key] = iteratee(obj[key], key, obj) || obj[key];
+        }
+      } else {
+        result[key] = iteratee(obj[key], key, obj) || obj[key];
       }
     }
   }
 
-  return result 
+  return result
+}
+
+
+/**
+ * 存在的问题:
+ * 1. 不能处理 map set 等值 还有循环引用..
+ * 2. 相同属性存在覆盖现象
+ * 
+ */
+
+/**
+ * 打平对象，iteratee 函数处理打平后的每一个属性
+ * 
+ * @param {*} obj 
+ * @param {*} iteratee 
+ * @param {*} context 
+ * @returns 
+ */
+function flattenObj(obj, iteratee, context) {
+  iteratee = iteratee == null 
+   ? identity 
+   : cb(iteratee, context);
+   
+  return eachFlattenObj(obj, iteratee, true, {})
 }
 
 /**
- * 存在的问题 就是不能处理 map set 等值 还有循环引用..
+ * 遍历对象 (但不会返回任何值)
+ * 
+ * @param {*} obj 目标对象
+ * @param {*} iteratee 回调函数(value, key, obj)
+ * @returns 
  */
+function eachObj(obj, iteratee) {
+  if (isObject(obj)) return void 0
+
+  iteratee = cb(iteratee);
+
+  var _keys = keys(result);
+  for (var i, len = _keys.length; i < len; i++) {
+    var key = _keys[i];
+    iteratee(obj[key], key, obj);
+  }
+}
 
 function radomId(){
   // todo 获取传入的参数生成 md5 或者是一些其他的东西
@@ -724,8 +793,9 @@ var allExports = {
   deepClone: deepClone,
   mapObj: mapObj,
   extend: extend,
-  extendOwn: extendOwn$1,
-  unfoldObj: unfoldObj,
+  extendOwn: extendOwn,
+  flattenObj: flattenObj,
+  eachObj: eachObj,
   radomId: radomId
 };
 
@@ -733,5 +803,5 @@ var _ = mixin(allExports);
 
 _._ = _;
 
-export { allKeys, deepClone, _ as default, each, extend, extendOwn$1 as extendOwn, functions, getType, hasSymbolKeys, identity, isArguments, isArray, isFunction, isObject, keys, log, map, mapObj, mixin, radomId, restArguments, unfoldObj };
+export { allKeys, deepClone, _ as default, each, eachObj, extend, extendOwn, flattenObj, functions, getType, hasSymbolKeys, identity, isArguments, isArray, isFunction, isObject, keys, log, map, mapObj, mixin, radomId, restArguments };
 //# sourceMappingURL=RXutils.esm.js.map

@@ -28,10 +28,11 @@ export { default as map } from './map'
 
 // 对象 
 export { default as deepClone } from './deepClone'                 /** 深拷贝 */
-export { default as mapObj } from './mapObj'                       /* 遍历对象（浅层遍历） */
+export { default as mapObj } from './mapObj'                       /* 遍历对象（浅层遍历）会返回值 */
 export { default as extend } from './extend'                       /* 多个组合对象 */
 export { default as extendOwn } from './extendOwn'                 /* 组合多个对象 （所有属性） */
-export { default as unfoldObj } from './unfoldObj'                 /* 对象属性的平铺 */
+export { default as flattenObj } from './flattenObj'               /* 对象属性的平铺(深度遍历)后使用函数回调处理并返回处理的值*/
+export { default as eachObj } from './eachObj'                     /* 遍历对象（浅层遍历）不会有返回值 */
 
 // 额外的
 export { default as radomId } from './radomId'                    /**生成随机 Id */
